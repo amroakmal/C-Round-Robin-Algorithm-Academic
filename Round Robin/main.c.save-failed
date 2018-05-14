@@ -1,0 +1,236 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define DT P
+
+typedef struct
+{
+    char pname[5];
+    int st,et,aux;
+} P;
+
+typedef struct
+{
+    DT data;
+    struct QNode* next;
+
+} QNode;
+
+typedef struct
+{
+    QNode* front,*rear;
+} Queue;
+
+int isEmpty(Queue* q)
+{
+    if(q->front == NULL )
+        return 1;
+    return 0;
+}
+
+QNode* new_node(DT value)
+{
+    QNode* temp = (QNode*)malloc(sizeof(QNode));
+    temp->data = value;
+    temp->next = NULL;
+    return temp;
+}
+
+void initializeQ(Queue* q)
+{
+    q->front = q->rear = NULL;
+}
+
+void enQueue(Queue* q, DT value)
+{
+    QNode* n = new_node(value);
+    if(isEmpty(q))
+    {
+        q->front = q->rear = n;
+    }
+    else
+    {
+        q->rear->next = n;
+        q->rear = n;
+    }
+}
+
+int size(Queue* q)
+{
+    int c=0;
+    QNode* n = q->front;
+    while(n)
+    {
+        c++;
+        n=n->next;
+    }
+    return c;
+}
+
+DT DeQueue(Queue* q)
+{
+    if(!isEmpty(&q))
+    {
+        DT x = q->front->data;
+        QNode* tempo = q->front;
+        q->front = q->front->next;
+        free(tempo);
+        return x;
+    }
+    else
+    {
+        printf("Queue is empty");
+        exit(-1);
+
+    }
+}
+
+int main()
+{
+    DT array[100];
+    DT temp;
+    int i=0,j;
+    FILE *fp;
+
+    fp = fopen("datafile.txt", "r");
+    char src[28]; // a temp array for just getting the wanted time slots from the file
+    while(!feof(fp))
+    {
+        fgets(src,28,fp);
+        break;
+    }
+    //getting the wanted time slots to work on from the given file
+    int c1=src[22]-'0';
+    int  c2=src[23]-'0';
+    int tot=c1*10+c2;
+    char auxarray[tot][tot];
+    int data1 [4];
+    char data2 [tot][tot];
+    if(fp != NULL)
+    {
+        while(!feof(fp))
+        {
+            fscanf(fp, "%s" "%d" "%d",  array[i].pname,&array[i].st,&array[i].et);
+            i++;
+        }
+    }
+    //auxn: for getting the number of processes to be worked on from the file
+    int auxn=i;
+    Queue Q;
+    initializeQ(&Q);
+    for(i=0; i<tot; i++)
+    {
+        for(j=0; j<tot; j++)
+        {
+            auxarray[i][j]='\0';
+        }
+    }
+//Make sure processes scheduled assendingly from the File
+    for(i=0; i<tot; i++)
+    {
+        for(j=i+1; j<auxn-2; j++)
+        {
+            if(array[i].st >array[j].st)
+            {
+                temp = array[i];
+                array[i]=array[j];
+                array[j]=temp;
+            }
+        }
+
+    }
+    //enQueueing all the processes at the beginning before scheduling
+    //tot: the wanted watching time slots form the file
+    //Nested Loop as may more than one process have same start time
+    for(i=0; i<tot; i++)
+    {
+        for(j=0; j<auxn-1; j++)
+        {
+            if(i==array[j].st)
+            {
+                enQueue(&Q,array[j]);
+            }
+
+        }
+    }
+
+
+    DT t;
+    int x;
+    int cntnumber=auxn-1;
+    for(i=0; i<tot; i++)
+    {
+        x=0;
+        for(j=0; j<cntnumber; j++)
+        {
+            t=DeQueue(&Q);
+            //Checking if its the right process's start time to operate in it or not
+            if(t.st <= i )
+            {
+                x=1;
+                if(t.et == 0)
+                {
+                    DeQueue(&Q);
+                }
+                break;
+            }
+            //if not the right process time, return it back to the Queue and check the next process
+            else
+            {
+                enQueue(&Q,t);
+            }
+        }
+        //if its the right process time to work on
+        if(x==1)
+        {
+            strcpy(auxarray[i],t.pname);
+            //decrement the exec. time for the process
+            t.et--;
+            //checking if the program aborted or not
+            if(t.et ==0 )
+            {
+                data1[i]=i;
+                strcpy(data2[i],t.pname);
+                printf("%s \t (%d--->%d)  %s aborts\n",t.pname,i,i+1,t.pname);
+                t.aux = i-(t.st-t.et-1);
+                cntnumber--;
+            }
+            else
+            {
+                printf("%s \t (%d--->%d) \n",t.pname,i,i+1);
+                enQueue(&Q,t);
+            }
+        }
+        //if no processes working on this time interval
+        else
+        {
+            printf("idle \t (%d--->%d)\n",i,i+1);
+        }
+        //when to end after the given wanted time sots
+        if(i==tot-1)
+        {
+            printf("stop\n");
+            break;
+        }
+    }
+    printf("\n");
+
+    for(i=0; i<cntnumber; i++)
+        printf("Gantt Table:\nProcess\tFrom:\tTo:\tWaiting Time:\n");
+    for(i=0; i<tot; i++)
+    {
+
+
+            printf("\t|%d\t|%d\t",i,i+1);
+
+        for(j=0; i<cntnumber; j++)
+        {
+             if(strcmp(data2[j],auxarray[i]))
+                printf("%d\n",data1[i]);
+
+
+        }
+    }
+
+
+}

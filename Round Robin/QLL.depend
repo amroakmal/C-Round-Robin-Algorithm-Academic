@@ -1,0 +1,24 @@
+# depslib dependency file v1.0
+1522268545 source:c:\users\amrak\desktop\qll\main.c
+	<stdio.h>
+	<stdlib.h>
+	"QLL.h"
+
+1522268392 c:\users\amrak\desktop\qll\qll.h
+
+1522268483 source:c:\users\amrak\desktop\qll\qll.c
+	<stdio.h>
+	<stdlib.h>
+
+1522268651 source:c:\users\amrak\desktop\4610\main.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"QLL.h"
+
+1522268392 c:\users\amrak\desktop\4610\qll.h
+
+1522268483 source:c:\users\amrak\desktop\4610\qll.c
+	<stdio.h>
+	<stdlib.h>
+
